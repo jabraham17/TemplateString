@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [2.7.0, latest]
+    runs-on: ubuntu-latest
+    container:
+      image: chapel/chapel:${{ matrix.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the project builds
+        run: |
+          mason build
+      - name: Run mason tests
+        run: |
+          mason test --parallel
+      - name: Run chplcheck
+        run: |
+          chplcheck src/**/*.chpl

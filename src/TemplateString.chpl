@@ -1,47 +1,84 @@
-/* Documentation for TemplateString */
-module TemplateString {
+/*
+  A simple template string implementation. Template strings are a more
+  structured way to do string interpolation, where you can define a template
+  with placeholders for variables, and then fill in those variables later.
 
+  Example usage:
+
+  .. code-block:: chapel
+
+      var template: templateString = "Hello, {{name}}! Today is {{day}}.";
+      var variables: map(string, string);
+      variables["name"] = "Alice";
+      variables["day"] = "Monday";
+      var result = template(variables);
+      writeln(result); // Output: Hello, Alice! Today is Monday.
+*/
+module TemplateString {
   use Map;
 
-  class TemplateStringError: Error {
-    proc init(message: string) {
-      super.init(message);
-    }
-  }
 
+  /*
+    The template string type. Template strings can either be implicitly created
+    from string literals, or explicitly created with the constructor. The
+    template string type has a single field, `template`, which is the template
+    string itself. Variables in the template string are denoted by
+    ``{{variableName}}`` by default, but this can be customized.
+
+    .. code-block:: chapel
+
+      var template =
+        new templateString("Hello, <<name>>! Today is <<day>>.", ("<<", ">>"));
+      var variables: map(string, string);
+      variables["name"] = "Alice";
+      variables["day"] = "Monday";
+      var result = template(variables);
+      writeln(result); // Output: Hello, Alice! Today is Monday.
+
+  */
   record templateString {
     var template: string;
+    @chpldoc.nodoc
     var variableWrapper: (string, string);
+    @chpldoc.nodoc
     proc init(template: string) {
       this.template = template;
       this.variableWrapper = ("{{", "}}");
     }
+    @chpldoc.nodoc
     proc init(template: string, variableWrapper: (string, string)) throws {
       this.template = template;
       this.variableWrapper = variableWrapper;
       init this;
       checkVariableWrapper();
     }
+
+    @chpldoc.nodoc
     proc init=(other: templateString) {
       this.template = other.template;
       this.variableWrapper = other.variableWrapper;
     }
+    @chpldoc.nodoc
     operator =(ref x: templateString, other: templateString) {
       x.template = other.template;
       x.variableWrapper = other.variableWrapper;
     }
+
+    @chpldoc.nodoc
     proc init=(other: string) {
       this.template = other;
       this.variableWrapper = ("{{", "}}");
     }
+    @chpldoc.nodoc
     operator =(ref x: templateString, other: string) {
       x.template = other;
       x.variableWrapper = ("{{", "}}");
     }
-
+    @chpldoc.nodoc
     operator :(other: string, type t) where t == templateString {
       return new templateString(other);
     }
+
     @chpldoc.nodoc
     proc checkVariableWrapper() throws {
       const prefix = variableWrapper[0];
@@ -59,9 +96,35 @@ module TemplateString {
               x == '_'.toByte() || x == '-'.toByte();
     }
 
+    /*
+      Fill in the template string with the provided variables, returning the
+      result.
+
+      :arg variables: The variables to fill the template with. This can either
+                      be a :type:`Map.map` of strings to strings or an
+                      associative array with string keys and string values.
+
+      :throws TemplateStringError: If the template string is malformed (e.g.
+                                   has an unclosed variable) or if a variable in
+                                   the template string is not
+                                   found in the variables map.
+    */
     proc this(variables): string throws do
       return fill(variables);
 
+    /*
+      Fill in the template string with the provided variables, returning the
+      result.
+
+      :arg variables: A :type:`Map.map` of strings to strings, where the keys
+                      are the variable names and the values are the
+                      replacements.
+
+      :throws TemplateStringError: If the template string is malformed (e.g.
+                                   has an unclosed variable) or if a variable in
+                                   the template string is not
+                                   found in the variables map.
+    */
     proc fill(variables: map(string, string)): string throws {
 
       const prefix = variableWrapper[0];
@@ -127,6 +190,19 @@ module TemplateString {
       return output;
     }
 
+    /*
+      Fill in the template string with the provided variables, returning the
+      result.
+
+      :arg variables: An associative array with string keys and string values,
+                      where the keys are the variable names and the values are
+                      the replacements.
+
+      :throws TemplateStringError: If the template string is malformed (e.g.
+                                   has an unclosed variable) or if a variable in
+                                   the template string is not
+                                   found in the variables map.
+    */
     proc fill(variables: [] string): string throws
       where variables.isAssociative() &&
            variables.domain.idxType == string {
@@ -135,6 +211,16 @@ module TemplateString {
         variablesMap[varName] = variables[varName];
       }
       return fill(variablesMap);
+    }
+  }
+
+  /*
+    Error type for TemplateString errors
+  */
+  class TemplateStringError: Error {
+    @chpldoc.nodoc
+    proc init(message: string) {
+      super.init(message);
     }
   }
 }

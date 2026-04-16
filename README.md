@@ -9,7 +9,7 @@ placeholders with actual values from a map.
 Add TemplateString as a Mason dependency:
 
 ```bash
-mason add TemplateString@0.1.0
+mason add TemplateString@0.2.0
 ```
 
 ## Usage

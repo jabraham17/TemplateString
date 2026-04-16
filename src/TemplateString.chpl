@@ -37,6 +37,7 @@ module TemplateString {
 
   */
   record templateString {
+    /* The template string itself. */
     var template: string;
     @chpldoc.nodoc
     var variableWrapper: (string, string);

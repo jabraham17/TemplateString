@@ -24,7 +24,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: chapel/chapel:latest
+      # TODO: use nightly to get the latest chpldoc features, switch to stable
+      # when 2.9 is released
+      image: chapel/chapel:nightly
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,7 +41,7 @@ jobs:
           path: ./doc/
 
   deploy:
-    if: github.event_name == 'push' && github.repository == 'jabraham17/TemplateString'
+    if: github.event_name == 'push' && !github.event.repository.fork
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

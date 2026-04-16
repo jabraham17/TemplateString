@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [2.7.0, latest]
+        version: [2.7.0, 2.8.0, latest]
     runs-on: ubuntu-latest
     container:
       image: chapel/chapel:${{ matrix.version }}
@@ -25,9 +25,21 @@ jobs:
       - name: Check the project builds
         run: |
           mason build
+      - name: Check the examples build and run
+        run: |
+          mason build --example
+          for example in $(ls example/*.chpl); do
+            mason run --example $(basename $example);
+          done
       - name: Run mason tests
         run: |
-          mason test --parallel
+          mason test --show --parallel
       - name: Run chplcheck
         run: |
           chplcheck src/**/*.chpl
+      - name: Check undocumented symbols
+        shell: bash
+        run: |
+          shopt -s globstar
+          chpl_home=$(chpl --print-chpl-home)
+          CHPL_HOME=$chpl_home $chpl_home/tools/chpldoc/findUndocumentedSymbols --ci src/**/*.chpl

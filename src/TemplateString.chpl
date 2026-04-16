@@ -14,6 +14,8 @@
       var result = template(variables);
       writeln(result); // Output: Hello, Alice! Today is Monday.
 */
+@chpldoc.noUsage
+@chpldoc.noAutoInclude
 module TemplateString {
   use Map;
 

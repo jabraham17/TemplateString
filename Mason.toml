@@ -1,14 +1,11 @@
 [brick]
-name="TemplateString"
-version="0.1.0"
-chplVersion="2.7.0"
-type="library"
-source="https://github.com/jabraham17/TemplateString"
-
-authors=["Jade Abraham"]
-copyrightYear="2026"
-license="Apache-2.0"
+name = "TemplateString"
+version = "0.2.0"
+chplVersion = "2.7.0"
+type = "library"
+source = "https://github.com/jabraham17/TemplateString"
+authors = ["Jade Abraham"]
+copyrightYear = "2026"
+license = "Apache-2.0"
 
 [dependencies]
-
-
